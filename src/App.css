@@ -92,17 +92,6 @@
   background: rgba(86, 216, 93, 0.12);
   font-weight: 600;
 }
-/* .cell.today::after {
-  content: "";
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background: #56d85d;
-  border-radius: 50%;
-} */
 .cell.today:hover {
   filter: drop-shadow(0 0 2em #56d85daa);
 }
@@ -137,7 +126,29 @@
 }
 .reminder{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+.cell.empty {
+  pointer-events: none;
+  background: transparent;
+  border: none;
+}
+.reminder-textarea{
+  border: 2px solid #56d85d;
+  border-radius: 10px;
+  background: #242424;
+}
+.reminder-btn{
+  color: #56d85d;
+  margin-top: 1vh;
+}
+.cell-selected{
+  color: #56d85d;
+  border: 2px solid #56d85d;
+  border-radius: 8px;
+  cursor: pointer;
+  filter: drop-shadow(0 0 1em #56d85daa);
+  transform: translateY(-2px);
 }

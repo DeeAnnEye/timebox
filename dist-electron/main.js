@@ -13,12 +13,14 @@ let win;
 function createWindow() {
   win = new BrowserWindow({
     frame: false,
+    width: 900,
+    height: 650,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname$1, "preload.mjs")
-    }
+    },
+    title: "Timebox"
   });
-  win.webContents.openDevTools();
   Menu.setApplicationMenu(null);
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());

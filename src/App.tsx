@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import moment from "moment";
 import Header from "./Header";
@@ -11,11 +11,16 @@ const YEAR = now.getFullYear();
 function App() {
   const [year, setYear] = useState(YEAR);
   const [month, setMonth] = useState(MONTH);
-  const [date, setDate] = useState<any>(DATE);
+  const [date, setDate] = useState<any>("");
   const [reminder, setReminder] = useState("");
+  const [calendarGrid, setCalendarGrid] = useState<any>([]);
   const todayISO = new Date().toISOString().split("T")[0];
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  useEffect(() => {
+    getCalendarGrid();
+  }, []);
 
   const getCalendarGrid = () => {
     const dates = [];
@@ -36,7 +41,7 @@ function App() {
       });
     }
 
-    return dates;
+    setCalendarGrid(dates);
   };
 
   const handleMonth = (type: any) => {
@@ -57,23 +62,34 @@ function App() {
     }
     getCalendarGrid();
   };
-  type ReminderMap = Record<string, string[]>;
+
+  type ReminderMap = Record<string, string>;
 
   const saveReminder = () => {
     const raw = localStorage.getItem("reminders");
     const data: ReminderMap = raw ? JSON.parse(raw) : {};
 
-    data[date] = data[date] || [];
-    data[date].push(reminder);
-    console.log(data,"DATA")
+    data[date] = reminder;
+
     localStorage.setItem("reminders", JSON.stringify(data));
+    getCalendarGrid();
   };
 
-  const getReminders = (date: any): string[] => {
+  const getReminder = (date: string): string => {
     const raw = localStorage.getItem("reminders");
     const data: ReminderMap = raw ? JSON.parse(raw) : {};
 
-    return data[date] || [];
+    return data[date] || "";
+  };
+
+  const handleDateClick = (sdate: any) => {
+    if (date === sdate) {
+      setDate("");
+      return;
+    }
+    setDate(sdate);
+    const rm = getReminder(sdate);
+    setReminder(rm);
   };
 
   return (
@@ -92,26 +108,50 @@ function App() {
           <button onClick={() => handleMonth("next")}>{"\u276F"}</button>
         </div>
         <div className="cal-header">
-          {weekdays.map((day) => (
-            <div className="cal-header-item">{day.toUpperCase()}</div>
-          ))}
-        </div>
-        <div className="calendar">
-          {getCalendarGrid().map((item, index) => (
-            <div
-              key={index}
-              className={`cell ${item?.date === todayISO ? "today" : ""}`}
-              onClick={()=>setDate(item?.date)}
-            >
-              {item ? item.day : ""}
-              {/* {getReminders(item?.date).length > 0 && <span className="dot" />} */}
+          {weekdays.map((day, index) => (
+            <div key={index} className="cal-header-item">
+              {day.toUpperCase()}
             </div>
           ))}
         </div>
-        {/* <div className="reminder">
-          <textarea cols={50} rows={4} onChange={(e)=>setReminder(e.target.value)} />
-          <button onClick={() => saveReminder()}>SAVE</button>
-        </div> */}
+        <div className="calendar">
+          {calendarGrid.map((item: any, index: any) => {
+            if (!item) {
+              return <div key={index} className="cell empty" />;
+            }
+
+            return (
+              <div
+                key={index}
+                className={`cell ${
+                  item.date === todayISO
+                    ? "today"
+                    : date === item.date
+                    ? "cell-selected"
+                    : ""
+                }`}
+                onClick={() => handleDateClick(item.date)}
+              >
+                {item.day}
+                {getReminder(item.date).length > 0 && <span className="dot" />}
+              </div>
+            );
+          })}
+        </div>
+        {date && (
+          <div className="reminder">
+            <textarea
+              className="reminder-textarea"
+              cols={50}
+              rows={3}
+              value={reminder}
+              onChange={(e) => setReminder(e.target.value)}
+            />
+            <button className="reminder-btn" onClick={() => saveReminder()}>
+              SAVE
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
